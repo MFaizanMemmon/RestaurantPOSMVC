@@ -11,6 +11,11 @@ namespace RestaurantManagementUI.Repository
         private IDbConnection _connection;
         private IDbTransaction _transaction;
 
+        public async Task<int> AddStaff(StaffViewModel staffViewModel)
+        {
+           return await _connection.ExecuteAsync("insert into Staff (StaffName, StaffPhone, RoleID, StaffRole, UserName, UserPassword) values (@StaffName, @StaffPhone, @RoleID, @StaffRole, @UserName, @UserPassword)", staffViewModel, transaction: _transaction);
+        }
+
         public async Task<int> DeleteStaff(int? id)
         {
             return await _connection.ExecuteAsync("delete from Staff where StaffID = @StaffID", new { StaffID = id }, transaction: _transaction);
@@ -40,6 +45,11 @@ namespace RestaurantManagementUI.Repository
         {
             _connection = transaction.Connection;
             _transaction = transaction;
+        }
+
+        public async Task<int> UpdateStaff(StaffViewModel staffViewModel)
+        {
+            return await _connection.ExecuteAsync("update Staff set StaffName = @StaffName, StaffPhone = @StaffPhone, RoleID = @RoleID, StaffRole = @StaffRole, UserName = @UserName, UserPassword = @UserPassword where StaffID = @StaffID", staffViewModel, transaction: _transaction);
         }
     }
 }

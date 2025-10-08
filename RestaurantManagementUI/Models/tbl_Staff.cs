@@ -7,5 +7,7 @@
         public string? StaffPhone { get; set; }
         public int RoleID { get; set; }
         public string? StaffRole { get; set; }
+        public string? UserName { get; set; }
+        public string? UserPassword { get; set; }
     }
 }

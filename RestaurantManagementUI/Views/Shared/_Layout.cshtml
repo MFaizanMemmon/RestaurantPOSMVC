@@ -17,15 +17,15 @@
         var username = Context.Session.GetString("Username") ?? "User";
     }
     
-    <header>
+    <header style="max-height: 10vh;">
         <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
             <div class="container-fluid">
                 <!-- Logo -->
-                <a class="navbar-brand" href="#">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Restaurant_icon.svg/1024px-Restaurant_icon.svg.png"
-                         alt="Restaurant Logo"
-                         style="height:40px; width:40px; object-fit:cover;">
+                <a class="navbar-brand d-flex align-items-center" href="#" style="height:40px;">
+                    <span class="fw-bold text-uppercase" style="font-size:1.3rem; color:#0d6efd;">Pulse</span>
+                    <span class="text-danger ms-1" style="font-size:1.3rem;">POS</span>
                 </a>
+
 
 
 
@@ -73,70 +73,62 @@
         <!-- Sidebar -->
         <div id="sidebarMenu" class="d-flex flex-column flex-shrink-0">
             <div class="p-3 d-flex flex-column" style="height:100vh;">
-              
-                <ul class="navbar-nav flex-column flex-grow-1">
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" asp-action="Index" asp-controller="Home">
-                            <i class="bi bi-house-door me-2"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-action="CategoryList" asp-controller="PointOfSale">
-                            <i class="bi bi-tags me-2"></i> Category
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-action="ProductList" asp-controller="PointOfSale">
-                            <i class="bi bi-basket me-2"></i> Menu
-
-
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="PointOfSale" asp-action="TableList">
-                            <i class="bi bi-grid-3x3-gap me-2"></i> Table
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="PointOfSale" asp-action="StaffList">
-                            <i class="bi bi-people me-2"></i> Employees
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="POS">
-                            <i class="bi bi-cash-stack me-2"></i> POS
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="KOT" asp-action="Index">
-                            <i class="bi bi-journal-check me-2"></i> KOT
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="bi bi-bar-chart-line me-2"></i> Reports
-                        </a>
-                    </li>
-
-                </ul>
                 <button class="btn mt-auto w-100 d-flex justify-content-end align-items-center" id="toggleSidebar" type="button">
-                     <i class="bi bi-arrow-left-circle ms-2 toggle-icon"></i>
+                    <i class="bi bi-arrow-left-circle ms-2 toggle-icon"></i>
                 </button>
-
+                <ul class="navbar-nav flex-column flex-grow-1 mt-3">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-action="Index" asp-controller="Home" title="Dashboard">
+                            <i class="bi bi-house-door me-2"></i> <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-action="CategoryList" asp-controller="PointOfSale" title="Category">
+                            <i class="bi bi-tags me-2"></i> <span>Category</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-action="ProductList" asp-controller="PointOfSale" title="Menu">
+                            <i class="bi bi-basket me-2"></i> <span>Menu</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="PointOfSale" asp-action="TableList" title="Table">
+                            <i class="bi bi-grid-3x3-gap me-2"></i> <span>Table</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="PointOfSale" asp-action="StaffList" title="Employees">
+                            <i class="bi bi-people me-2"></i> <span>Employees</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Home" asp-action="POS" title="POS">
+                            <i class="bi bi-cash-stack me-2"></i> <span>POS</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="KOT" asp-action="Index" title="KOT">
+                            <i class="bi bi-journal-check me-2"></i> <span>KOT</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" title="Reports">
+                            <i class="bi bi-bar-chart-line me-2"></i> <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
 
-
         <!-- Main Content -->
         <div class="flex-grow-1 p-4">
-            <main role="main" class="pb-3 shifted">
-               
+            <main role="main" class="pb-3">
                 @RenderBody()
             </main>
         </div>
     </div>
+
  @*    <div class="loader-container">
         <span class="loader"></span>
     </div> *@

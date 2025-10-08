@@ -203,6 +203,7 @@ namespace RestaurantManagementUI.Controllers
             return RedirectToAction("ProductList");
         }
 
+
         [HttpGet]
         public async Task<IActionResult> TableList()
         {
@@ -289,6 +290,32 @@ namespace RestaurantManagementUI.Controllers
                .ToList();
             return PartialView("_StaffAddEdit", staff);
         }
+        [HttpPost]
+        public async Task<IActionResult> StaffAddEdit(StaffViewModel staff)
+        {
+            try
+            {
+                _unitOfWork.BeginTransaction();
+                if (staff.StaffID == 0)
+                {
+                    await _unitOfWork.Staffs.AddStaff(staff);
+                    TempData["Success"] = "Staff created successfully!";
+                }
+                else
+                {
+                    await _unitOfWork.Staffs.UpdateStaff(staff);
+                    TempData["Success"] = "Staff updated successfully!";
+                }
+                _unitOfWork.CommitTransaction();
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.RollbackTransaction();
+                TempData["Error"] = ex.Message;
+            }
+            return RedirectToAction("StaffList");
+        }
+
         [HttpGet]
         public async Task<IActionResult> DeleteStaff(int? id)
         {

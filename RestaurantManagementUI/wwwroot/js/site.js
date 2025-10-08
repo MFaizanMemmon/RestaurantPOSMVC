@@ -1,39 +1,79 @@
-﻿$("#toggleSidebar").on("click", function () {
-    $("#sidebarMenu").toggleClass("active");
-    $("main").toggleClass("shifted");
-});
+﻿(function () {
+    const isCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+    if (isCollapsed) {
+        document.documentElement.classList.add("sidebar-collapsed");
+    }
+})();
+
+// Toggle sidebar and save state in localStorage
 $("#toggleSidebar").on("click", function () {
     $("#sidebarMenu").toggleClass("sidebar-collapsed");
+
+    // Save state (true = collapsed, false = expanded)
+    const isCollapsed = $("#sidebarMenu").hasClass("sidebar-collapsed");
+    localStorage.setItem("sidebarCollapsed", isCollapsed);
+
+    // Toggle icon direction
+    const $icon = $("#toggleSidebar .toggle-icon");
+    if (isCollapsed) {
+        $icon.removeClass("bi-arrow-left-circle").addClass("bi-arrow-right-circle");
+    } else {
+        $icon.removeClass("bi-arrow-right-circle").addClass("bi-arrow-left-circle");
+    }
 });
+
 document.addEventListener("DOMContentLoaded", function () {
     const links = document.querySelectorAll("#sidebarMenu .nav-link");
 
-    // Check if there's an active link saved in localStorage
-    const activeLink = localStorage.getItem("activeSidebarLink");
+    // --- Restore Sidebar State ---
+    const isCollapsed = localStorage.getItem("sidebarCollapsed") === "true";
+    if (isCollapsed) {
+        $("#sidebarMenu").addClass("sidebar-collapsed");
+        $("#toggleSidebar .toggle-icon")
+            .removeClass("bi-arrow-left-circle")
+            .addClass("bi-arrow-right-circle");
+    } else {
+        $("#toggleSidebar .toggle-icon")
+            .removeClass("bi-arrow-right-circle")
+            .addClass("bi-arrow-left-circle");
+    }
 
+    // --- Manage Active Link ---
+    const activeLink = localStorage.getItem("activeSidebarLink");
     links.forEach(link => {
-        // Remove any existing active class
         link.classList.remove("active");
 
-        // Add active class if this link was saved
         if (activeLink && link.getAttribute("href") === activeLink) {
             link.classList.add("active");
         }
 
-        // Add click event to update active link
         link.addEventListener("click", function () {
-            // Remove active from all links
             links.forEach(l => l.classList.remove("active"));
-
-            // Add active to clicked link
             this.classList.add("active");
-
-            // Save clicked link href in localStorage
             localStorage.setItem("activeSidebarLink", this.getAttribute("href"));
         });
     });
 });
 
+
+// --- On Page Load ---
+document.addEventListener("DOMContentLoaded", function () {
+    const isFullscreen = localStorage.getItem("isFullscreen") === "true";
+    const $btn = $('#btnFullscreen');
+    const $icon = $btn.find('i');
+
+    // We CANNOT auto-enter fullscreen due to browser restrictions.
+    // So only update the icon and tooltip to match last known state.
+    if (isFullscreen) {
+        $icon.removeClass('bi-arrows-fullscreen').addClass('bi-fullscreen-exit');
+        $btn.attr('title', 'Exit Fullscreen');
+    } else {
+        $icon.removeClass('bi-fullscreen-exit').addClass('bi-arrows-fullscreen');
+        $btn.attr('title', 'Enter Fullscreen');
+    }
+});
+
+// --- Fullscreen toggle handler ---
 $('#btnFullscreen').on('click', function (e) {
     e.preventDefault();
 
@@ -45,14 +85,33 @@ $('#btnFullscreen').on('click', function (e) {
         document.documentElement.requestFullscreen();
         icon.removeClass('bi-arrows-fullscreen').addClass('bi-fullscreen-exit');
         link.attr('title', 'Exit Fullscreen');
+        localStorage.setItem("isFullscreen", "true");
     }
     // Exit fullscreen
     else {
         if (document.exitFullscreen) document.exitFullscreen();
         icon.removeClass('bi-fullscreen-exit').addClass('bi-arrows-fullscreen');
         link.attr('title', 'Enter Fullscreen');
+        localStorage.setItem("isFullscreen", "false");
     }
 });
+
+// --- Update localStorage when user exits manually (e.g. ESC) ---
+document.addEventListener("fullscreenchange", function () {
+    const $btn = $('#btnFullscreen');
+    const $icon = $btn.find('i');
+
+    if (!document.fullscreenElement) {
+        $icon.removeClass('bi-fullscreen-exit').addClass('bi-arrows-fullscreen');
+        $btn.attr('title', 'Enter Fullscreen');
+        localStorage.setItem("isFullscreen", "false");
+    } else {
+        $icon.removeClass('bi-arrows-fullscreen').addClass('bi-fullscreen-exit');
+        $btn.attr('title', 'Exit Fullscreen');
+        localStorage.setItem("isFullscreen", "true");
+    }
+});
+
 
 
 $('.dt').each(function () {

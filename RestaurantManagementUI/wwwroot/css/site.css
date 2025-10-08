@@ -1,39 +1,64 @@
-#sidebarMenu {
-    width: 250px;
-    height: calc(100vh - 85px); /* below navbar */
-    transition: transform 0.4s ease-in-out;
-    transform: translateX(0);
-    background-color: #ffffff; /* clean white sidebar */
-    border-right: 1px solid #dee2e6; /* subtle separation */
-    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05); /* light shadow */
+﻿#sidebarMenu {
+    width: 230px;
+    transition: all 0.4s ease;
+    background-color: #ffffff;
+    border-right: 1px solid #dee2e6;
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
 }
 
-    #sidebarMenu.sidebar-collapsed {
-        transform: translateX(-100%);
-    }
-
-    /* Default link style */
-    #sidebarMenu a.nav-link {
-        color: #212529; /* dark text for readability */
+    /* 🔹 Expanded sidebar (default) */
+    #sidebarMenu .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: flex-start;
+        color: #212529;
         padding: 10px 15px;
         border-radius: 0.375rem;
         transition: all 0.3s ease;
         font-weight: 500;
     }
 
-        /* Hover and Active state - Pulse theme blue */
-        #sidebarMenu a.nav-link.active,
-        #sidebarMenu a.nav-link:hover {
-            background-color: #0d6efd; /* Pulse primary blue */
-            color: #ffffff !important;
-        }
-
-    /* Sidebar heading */
-    #sidebarMenu h5 {
-        color: #0d6efd; /* Pulse blue for headings */
+    /* 🔹 Collapsed sidebar (icons only) */
+    #sidebarMenu.sidebar-collapsed {
+        width: 70px;
     }
 
-    /* Icons */
+        #sidebarMenu.sidebar-collapsed .nav-link {
+            justify-content: center; /* center icon */
+        }
+
+            #sidebarMenu.sidebar-collapsed .nav-link i {
+                margin: 0;
+                font-size: 1.3rem;
+            }
+
+            /* Hide text when collapsed */
+            #sidebarMenu.sidebar-collapsed .nav-link span {
+                display: none;
+            }
+
+            /* Tooltip on hover (when collapsed) */
+            #sidebarMenu.sidebar-collapsed .nav-link[title]:hover::after {
+                content: attr(title);
+                position: absolute;
+                left: 75px;
+                background: #000;
+                color: #fff;
+                padding: 4px 8px;
+                border-radius: 4px;
+                white-space: nowrap;
+                font-size: 0.8rem;
+                z-index: 1000;
+            }
+
+    /* Hover and active colors */
+    #sidebarMenu a.nav-link.active,
+    #sidebarMenu a.nav-link:hover {
+        background-color: #0d6efd;
+        color: #ffffff !important;
+    }
+
     #sidebarMenu i {
         color: #0d6efd;
         transition: color 0.3s ease;
@@ -44,11 +69,26 @@
         color: #ffffff;
     }
 
-
-.renderBody {
-    background-color: #f0f2f8;
-    transition: margin-left 0.4s ease-in-out;
+/* Smooth main content shift */
+main {
+    transition: margin-left 0.4s ease;
 }
+
+#sidebarMenu.sidebar-collapsed + div main {
+    margin-left: 70px;
+}
+
+/* 🔹 Mobile mode */
+@media (max-width: 768px) {
+    #sidebarMenu {
+        width: 70px;
+    }
+
+        #sidebarMenu .nav-link span {
+            display: none;
+        }
+}
+
 
 .dt-buttons {
     display: inline-block;
