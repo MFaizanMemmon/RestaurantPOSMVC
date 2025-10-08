@@ -1,0 +1,110 @@
+﻿@{
+    ViewData["Title"] = "Staff";
+}
+
+
+<div class="mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h1 class="mb-0">Employees List</h1>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#employeeModal">
+            <i class="bi bi-plus-circle me-1"></i> Add Employee
+        </button>
+    </div>
+
+
+    <table id="employeeTable" class="table table-hover mt-5">
+        <thead class="table-primary">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Salary</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Employee rows -->
+            <!-- We'll generate 50 rows -->
+            <script>
+                const departments = ["Finance", "IT", "HR", "Marketing", "Sales", "Operations", "Logistics", "Accounts", "Procurement"];
+                for (let i = 1; i <= 50; i++) {
+                    const name = `Employee ${i}`;
+                    const dept = departments[Math.floor(Math.random() * departments.length)];
+                    const salary = (60000 + Math.floor(Math.random() * 60000)).toLocaleString();
+                    document.write(`
+                        <tr>
+                            <td>${i}</td>
+                            <td>${name}</td>
+                            <td>${dept}</td>
+                            <td>${salary}</td>
+                            <td>
+                                <button class="btn btn-sm btn-success" onclick="editRow(this)">Edit</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button>
+                            </td>
+                        </tr>
+                    `);
+                }
+            </script>
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="employeeModalLabel">Add New Employee</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="employeeForm">
+                    <div class="mb-3">
+                        <label for="employeeName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="employeeName" placeholder="Enter employee name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="employeeDepartment" class="form-label">Department</label>
+                        <input type="text" class="form-control" id="employeeDepartment" placeholder="Enter department" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="employeeSalary" class="form-label">Salary</label>
+                        <input type="number" class="form-control" id="employeeSalary" placeholder="Enter salary" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" form="employeeForm">Save Employee</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $('#employeeTable').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                    { extend: 'copy', className: 'btn btn-secondary' },
+                    { extend: 'csv', className: 'btn btn-success' },
+                    { extend: 'excel', className: 'btn btn-primary' },
+                    { extend: 'pdf', className: 'btn btn-danger' },
+                    { extend: 'print', className: 'btn btn-info' }
+                ],
+                pageLength: 10,
+                lengthMenu: [5, 10, 25, 50],
+                language: {
+                    search: "Search Employee:",
+                    lengthMenu: "Show _MENU_ entries"
+                },
+                // Enable Bootstrap 5 pagination
+                pagingType: "simple_numbers", // simple_numbers, full_numbers
+                renderer: 'bootstrap'
+            });
+        });
+ 
+
+
+    </script>
+}

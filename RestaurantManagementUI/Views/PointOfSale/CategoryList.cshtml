@@ -1,0 +1,97 @@
+﻿@model IEnumerable<RestaurantManagementUI.Models.tbl_Category>
+
+@{
+    ViewData["Title"] = "Category";
+}
+
+<div class="mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h3 class="mb-0">Categories</h3>
+        <button class="btn btn-primary"
+                onclick="openModal('Add Category', '/PointOfSale/CategoryAddEdit','md')">
+            <i class="bi bi-plus-circle me-1"></i> Add Category
+        </button>
+
+    </div>
+
+    <table id="categoryTable" class="table table-hover mt-5 dt">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Category Name</th>
+
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.CategoryID</td>
+                        <td>@item.CategoryName</td>
+                        <td>
+                            <button class="btn btn-sm btn-info"
+                                    onclick="openModal('Edit Category', '/PointOfSale/CategoryAddEdit?id=@item.CategoryID','md')">
+                                Edit
+                            </button>
+
+                           
+                            <button class="btn btn-sm btn-danger" onclick="showConfirm({
+                                    title: 'Delete Category',
+                                    message: 'Are you sure you want to delete this category?',
+                                    confirmText: 'Delete',
+                                    cancelText: 'Cancel',
+                                    url: '/PointOfSale/CategoryDelete?id=@item.CategoryID'
+                                })">
+                                Delete
+                            </button>
+
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+
+
+@section scripts {
+    <script>
+
+
+        // Edit/Delete functions
+        function editRow(button) {
+            const row = button.closest("tr");
+            const id = row.cells[0].innerText;
+            const name = row.cells[1].innerText;
+            const description = row.cells[2].innerText;
+
+            // Fill modal with existing data
+            document.getElementById("categoryName").value = name;
+            document.getElementById("categoryDescription").value = description;
+            document.getElementById("categoryModalLabel").innerText = "Edit Category";
+
+            // Show modal
+            var modal = new bootstrap.Modal(document.getElementById('categoryModal'));
+            modal.show();
+        }
+
+        function deleteRow(button) {
+            if (confirm("Are you sure you want to delete this category?")) {
+                const row = button.closest("tr");
+                row.remove();
+            }
+        }
+
+
+             $(document).on('shown.bs.modal', '.modal', function () {
+            // Find the first visible input inside this modal and focus it
+            $(this).find('input:visible:first').trigger('focus');
+        });
+
+
+    </script>
+}

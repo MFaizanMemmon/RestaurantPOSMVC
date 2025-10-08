@@ -1,0 +1,127 @@
+﻿@{
+    ViewData["Title"] = "Tables";
+}
+
+<div class="mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h1 class="mb-0">Tables List</h1>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tableModal">
+            <i class="bi bi-plus-circle me-1"></i> Add Table
+        </button>
+    </div>
+
+    <table id="tableNumberTable" class="table table-hover mt-5">
+        <thead class="table-primary">
+            <tr>
+                <th>ID</th>
+                <th>Table Number</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Sample 20 tables -->
+            <script>
+                for (let i = 1; i <= 20; i++) {
+                    const status = Math.random() > 0.5 ? "Available" : "Occupied";
+                    document.write(`
+                        <tr>
+                            <td>${i}</td>
+                            <td>Table ${i}</td>
+                            <td>${status}</td>
+                            <td>
+                                <button class="btn btn-sm btn-success" onclick="editRow(this)">Edit</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteRow(this)">Delete</button>
+                            </td>
+                        </tr>
+                    `);
+                }
+            </script>
+        </tbody>
+    </table>
+</div>
+
+<!-- Add/Edit Table Modal -->
+<div class="modal fade" id="tableModal" tabindex="-1" aria-labelledby="tableModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="tableModalLabel">Add New Table</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="tableForm">
+                    <div class="mb-3">
+                        <label for="tableNumber" class="form-label">Table Number</label>
+                        <input type="text" class="form-control" id="tableNumber" placeholder="Enter table number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tableStatus" class="form-label">Status</label>
+                        <select class="form-select" id="tableStatus" required>
+                            <option value="">Select Status</option>
+                            <option>Available</option>
+                            <option>Occupied</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" form="tableForm">Save Table</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // Initialize DataTable
+        $(document).ready(function () {
+            $('#tableNumberTable').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                    { extend: 'copy', className: 'btn btn-secondary' },
+                    { extend: 'csv', className: 'btn btn-success' },
+                    { extend: 'excel', className: 'btn btn-primary' },
+                    { extend: 'pdf', className: 'btn btn-danger' },
+                    { extend: 'print', className: 'btn btn-info' }
+                ],
+                pageLength: 10,
+                lengthMenu: [5, 10, 25, 50],
+                language: {
+                    search: "Search Table:",
+                    lengthMenu: "Show _MENU_ entries"
+                },
+                pagingType: "simple_numbers",
+                renderer: 'bootstrap'
+            });
+        });
+
+        // Edit/Delete functions
+        function editRow(button) {
+            const row = button.closest("tr");
+            const tableNumber = row.cells[1].innerText;
+            const status = row.cells[2].innerText;
+
+            document.getElementById("tableNumber").value = tableNumber;
+            document.getElementById("tableStatus").value = status;
+            document.getElementById("tableModalLabel").innerText = "Edit Table";
+
+            var modal = new bootstrap.Modal(document.getElementById('tableModal'));
+            modal.show();
+        }
+
+        function deleteRow(button) {
+            if (confirm("Are you sure you want to delete this table?")) {
+                const row = button.closest("tr");
+                row.remove();
+            }
+        }
+
+        // Reset modal on close
+        document.getElementById('tableModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById("tableForm").reset();
+            document.getElementById("tableModalLabel").innerText = "Add New Table";
+        });
+    </script>
+}

@@ -1,0 +1,23 @@
+﻿@model tbl_Table
+
+
+
+<form method="post" asp-controller="PointOfSale" asp-action="TableAddEdit" id="TableAddEdit">
+    @if (Model.Tid != 0)
+    {
+        <input type="hidden" asp-for="Tid" />
+    }
+    <div class="form-group mb-3">
+        <label asp-for="TName" class="form-label">Table Name</label>
+        <input asp-for="TName" class="form-control" autocomplete="off" />
+        <span asp-validation-for="TName" class="text-danger"></span>
+    </div>
+   
+</form>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="submit" class="btn btn-primary" form="TableAddEdit">Save Table</button>
+</div>
+
+

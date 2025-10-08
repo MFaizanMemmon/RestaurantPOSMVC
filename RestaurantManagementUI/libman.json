@@ -1,0 +1,18 @@
+{
+  "version": "3.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "bootswatch@5.3.8",
+      "destination": "wwwroot/bootswatch/",
+      "files": [
+        "pulse/bootstrap.css",
+        "pulse/bootstrap.min.css",
+        "pulse/bootstrap.min.css.map",
+        "pulse/bootstrap.rtl.css",
+        "pulse/bootstrap.rtl.min.css",
+        "pulse/bootstrap.rtl.min.css.map"
+      ]
+    }
+  ]
+}

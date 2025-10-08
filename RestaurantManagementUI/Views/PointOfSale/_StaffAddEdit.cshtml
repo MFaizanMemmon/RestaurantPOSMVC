@@ -1,0 +1,28 @@
+﻿@model StaffViewModel
+
+
+<div class="modal-body">
+    <form>
+        @if (Model.RoleID != 0)
+        {
+            <input type="hidden" asp-for="RoleID" />
+        }
+        <div class="mb-3">
+            <label asp-for="StaffName" class="form-label">Name</label>
+            <input asp-for="StaffName" class="form-control" autocomplete="off" />
+            <span asp-validation-for="StaffName" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="RoleID" class="form-label">Role</label>
+            <select asp-for="RoleID" class="form-select" asp-items="Model.Roles"></select>
+            <span asp-validation-for="RoleID" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="StaffPhone" class="form-label">Phone</label>
+            <input asp-for="StaffPhone" class="form-control" autocomplete="off" />
+            <span asp-validation-for="StaffName" class="text-danger"></span>
+        </div>
+      
+
+    </form>
+</div>
