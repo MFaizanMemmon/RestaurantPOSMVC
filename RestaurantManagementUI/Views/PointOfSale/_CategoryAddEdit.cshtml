@@ -1,24 +1,62 @@
 ﻿@model tbl_Category
 @{
-    Layout = null; // optional if you're loading this in a modal
+    Layout = null; 
 }
 
-
-<form id="categoryForm" asp-action="CategoryCreate" asp-controller="PointOfSale" method="post">
-    @if (Model != null && Model.CategoryID != 0)
-    {
-        <input type="hidden" asp-for="CategoryID" />
-    }
-
-    <div class="mb-3">
-        <label asp-for="CategoryName" class="form-label">Category Name</label>
-        <input asp-for="CategoryName" class="form-control" placeholder="Enter category name" required />
-        <span asp-validation-for="CategoryName" class="text-danger"></span>
-    </div>
-</form>
-
+<div class="mb-3">
+    <label for="CategoryName" class="form-label">Category Name</label>
+    <input type="hidden" id="CategoryID" value="@Model?.CategoryID ?? 0" />
+    <input type="text" id="CategoryName" class="form-control"
+           placeholder="Enter category name" value="@Model?.CategoryName" autocomplete="off" />
+    <span id="CategoryNameError" class="text-danger"></span>
+</div>
 
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-    <button type="submit" class="btn btn-primary" form="categoryForm">Save Category</button>
+    <button type="button" class="btn btn-primary" id="btnSaveCategory">Save Category</button>
 </div>
+
+<script>
+    $("#btnSaveCategory").click(function () {
+        // Clear previous validation errors
+        $("#CategoryNameError").text('');
+
+        var data = {
+            CategoryID: parseInt($("#CategoryID").val()),
+            CategoryName: $("#CategoryName").val().trim()
+        };
+
+        if (!data.CategoryName) {
+            $("#CategoryNameError").text("Category Name is required.");
+            return;
+        }
+
+        $.ajax({
+            url: '/PointOfSale/CategoryCreate',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            beforeSend: function () {
+                $("#btnSaveCategory").prop("disabled", true).text("Saving...");
+                $("#pulseLoader").fadeIn(200);
+            },
+            success: function (response) {
+                if (response.success) {
+                   
+                   
+                    location.reload();
+                } else {
+                    toastr.error(response.message || "Failed to save category.");
+                }
+            },
+            error: function (xhr) {
+                $("#btnSaveCategory").prop("disabled", false).text("Save Category");
+                $("#pulseLoader").faedeout(200);
+                toastr.error("Something went wrong while saving the category.");
+            }
+        });
+
+
+    });
+</script>

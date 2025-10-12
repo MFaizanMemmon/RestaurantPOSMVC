@@ -10,6 +10,8 @@ namespace RestaurantManagementUI.Unit_of_work
         ITable Table { get; }
         IStaff Staffs { get; }
 
+        IPOS POS { get; }
+
         void BeginTransaction();
         void CommitTransaction();
         void RollbackTransaction();

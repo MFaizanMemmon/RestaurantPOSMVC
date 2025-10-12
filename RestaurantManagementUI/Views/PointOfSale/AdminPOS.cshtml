@@ -1,0 +1,397 @@
+﻿@model AdminPOSViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pulse POS — Admin / Waiter</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/pulse/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pos-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border-bottom: 1px solid rgba(0,0,0,.05);
+        }
+
+        .pos-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .product-area {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            overflow: hidden;
+        }
+
+        .category-bar {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+            .category-bar button {
+                border-radius: 20px;
+                font-weight: 500;
+                white-space: nowrap;
+            }
+
+                .category-bar button.active {
+                    background-color: var(--bs-primary);
+                    color: #fff;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+                }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .product-card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            cursor: pointer;
+            text-align: center;
+            padding: 8px;
+            transition: 0.2s;
+            user-select: none;
+        }
+
+            .product-card:hover {
+                transform: scale(1.04);
+                box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            }
+
+            .product-card img {
+                width: 100%;
+                height: 120px;
+                object-fit: cover;
+                border-radius: 8px;
+            }
+
+        .order-panel {
+            width: 400px;
+            background: #fff;
+            border-left: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .order-header, .order-footer {
+            padding: 1rem;
+            background: #f8f9fa;
+        }
+
+        .order-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .order-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed rgba(0,0,0,.08);
+            padding: .5rem 0;
+        }
+
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            gap: .3rem;
+        }
+
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid var(--bs-secondary);
+            background-color: #fff;
+            color: var(--bs-secondary);
+            transition: .2s;
+        }
+
+            .qty-btn:hover {
+                background: var(--bs-primary);
+                color: #fff;
+                border-color: var(--bs-primary);
+            }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            font-weight: 500;
+            color: var(--bs-primary);
+            border: none;
+            background: transparent;
+            transition: .2s;
+        }
+
+            .back-btn:hover {
+                color: var(--bs-dark);
+            }
+    </style>
+</head>
+
+<body>
+    <div id="pulseLoader" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(255,255,255,0.7); z-index:9999; text-align:center;">
+        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="mt-2 fw-bold">Saving Order...</div>
+        </div>
+    </div>
+
+    <div class="pos-toolbar">
+        <button class="back-btn" onclick="goBack()">
+            <i class="bi bi-arrow-left-circle fs-5"></i> Back
+        </button>
+
+        <input id="searchInput" oninput="filterProducts()" class="form-control form-control-sm" style="max-width:300px;" placeholder="Search product..." />
+
+        <div class="ms-auto d-flex gap-2 align-items-center">
+        </div>
+    </div>
+
+    <div class="pos-content">
+        <section class="product-area">
+            <div class="category-bar" id="categoryBar">
+                <button class="btn btn-outline-primary btn-sm active" onclick="showAll(this)">All</button>
+                @foreach (var c in Model.Categories)
+                {
+                    <button class="btn btn-outline-primary btn-sm" data-cat="@c?.CategoryID" onclick="filterByCategory(@c?.CategoryID, this)">
+                        @c?.CategoryName
+                    </button>
+                }
+            </div>
+
+            <div class="product-grid" id="productGrid">
+                @foreach (var p in Model.Products)
+                {
+                    <div class="product-card" data-prod-category="@p?.CategoryId" data-name="@p?.ProductName.ToLower()" onclick="addToOrder(@p?.ProductID, '@p?.ProductName', @p?.ProductPrice)">
+                        <img src="@Url.Content(!string.IsNullOrEmpty(p?.ImageUrl) ? p.ImageUrl : "~/images/no-image.png")" alt="@p?.ProductName" />
+                        <div class="fw-bold">@p?.ProductName</div>
+                        <div class="text-muted">Rs. @String.Format("{0:0.00}", p?.ProductPrice)</div>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <aside class="order-panel">
+            <div class="order-header d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="fw-bold text-primary">🧾 Current Order</div>
+                </div>
+                <button class="btn btn-sm btn-outline-danger" onclick="clearOrder()">Clear</button>
+            </div>
+
+            <div class="order-items" id="orderItems">
+                <div class="text-center text-muted mt-5">
+                    <i class="bi bi-bag fs-1 d-block mb-2"></i>
+                    <div>No items yet. Tap a product to add.</div>
+                </div>
+            </div>
+
+            <div class="order-footer">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div><strong>Items:</strong> <span id="itemCount">0</span></div>
+                    <div><strong>Total:</strong> <span id="subTotal">Rs. 0.00</span></div>
+                </div>
+                <button class="btn btn-success w-100" onclick="confirmOrder()">Confirm Order</button>
+            </div>
+        </aside>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+   
+
+    <script>
+        const order = { items: [] };
+
+        function addToOrder(id, name, price) {
+            const existing = order.items.find(x => x.id === id);
+            if (existing) existing.qty++;
+            else order.items.unshift({ id, name, price: parseFloat(price), qty: 1 }); // ✅ add newest on top
+            renderOrder();
+        }
+
+        function increase(id) {
+            const item = order.items.find(x => x.id === id);
+            if (item) item.qty++;
+            renderOrder();
+        }
+
+        function decrease(id) {
+            const idx = order.items.findIndex(x => x.id === id);
+            if (idx > -1) {
+                order.items[idx].qty--;
+                if (order.items[idx].qty <= 0) order.items.splice(idx, 1);
+                renderOrder();
+            }
+        }
+
+        function renderOrder() {
+            const c = document.getElementById('orderItems');
+            if (!order.items.length) {
+                c.innerHTML = `<div class="text-center text-muted mt-5">
+                    <i class="bi bi-bag fs-1 d-block mb-2"></i><div>No items yet. Tap a product to add.</div></div>`;
+                document.getElementById('itemCount').innerText = '0';
+                document.getElementById('subTotal').innerText = 'Rs. 0.00';
+                return;
+            }
+
+            let subtotal = 0;
+            c.innerHTML = '';
+            order.items.forEach(it => {
+                const total = it.qty * it.price;
+                subtotal += total;
+                c.innerHTML += `
+                    <div class="order-row">
+                        <div>
+                            <div class="fw-semibold">${it.name}</div>
+                            <small class="text-muted">Rs. ${it.price.toFixed(2)} × ${it.qty} =
+                            <span class="text-success fw-bold">Rs. ${total.toFixed(2)}</span></small>
+                        </div>
+                        <div class="qty-controls">
+                            <button class="qty-btn" onclick="decrease(${it.id})"><i class="bi bi-dash"></i></button>
+                            <span class="qty-value">${it.qty}</span>
+                            <button class="qty-btn" onclick="increase(${it.id})"><i class="bi bi-plus"></i></button>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('itemCount').innerText = order.items.reduce((s, i) => s + i.qty, 0);
+            document.getElementById('subTotal').innerText = 'Rs. ' + subtotal.toFixed(2);
+        }
+
+        function clearOrder() { order.items = []; renderOrder(); }
+        function confirmOrder() { alert('Order confirmed (demo)'); }
+        function showAll(btn) {
+            document.querySelectorAll('.category-bar button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.product-card').forEach(c => c.style.display = 'block');
+        }
+        function filterByCategory(cat, btn) {
+            document.querySelectorAll('.category-bar button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.product-card').forEach(c => c.style.display = (c.dataset.prodCategory == cat) ? 'block' : 'none');
+        }
+        function filterProducts() {
+            const q = document.getElementById('searchInput').value.trim().toLowerCase();
+            document.querySelectorAll('.product-card').forEach(c =>
+                c.style.display = (c.dataset.name || '').includes(q) ? 'block' : 'none');
+        }
+        function goBack() {
+            localStorage.setItem("activeSidebarLink", "/PointOfSale/GetAllOrders");
+            window.location.href= "/PointOfSale/GetAllOrders";
+        }
+
+              function confirmOrder() {
+
+            if (!order.items.length) {
+                toastr.warning("No items in order. Please add products before saving.");
+                return;
+            }
+
+            // --- Build Order Header ---
+            var orderHeader = {
+                Date: new Date().toISOString().split('T')[0],
+                Time: null, 
+                TableName: '',
+                WaiterName: '', 
+                Status: "Un-Paid",
+                OrderType: "Take Away",
+                Total: order.items.reduce((sum, i) => sum + (i.qty * i.price), 0),
+                Received: 0,
+                Change: 0,
+                DriverID: 0,
+                CustName: '',
+                CustPhone: '',
+                IsPrint: false,
+                IsPrintUnPaid: false,
+                PaidDateTime: null
+            };
+
+            // --- Build Order Details from `order.items` ---
+            const orderDetail = order.items.map(it => ({
+                DetailID: 0,
+                MainID: 0,
+                ProID: it.id,
+                Qty: it.qty,
+                Price: it.price,
+                Amount: it.qty * it.price
+            }));
+
+            // --- Combine Header + Detail ---
+            const confirmOrderData = {
+                OrderHeader: orderHeader,
+                OrderDetail: orderDetail
+            };
+
+            // --- AJAX Request ---
+         $.ajax({
+            url: '/PointOfSale/CreateOrder',
+            type: 'POST',
+            data: JSON.stringify(confirmOrderData),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            beforeSend: function () {
+                // Disable button and show loader
+                $("#btnSaveOrder").prop("disabled", true).text("Saving...");
+                $("#pulseLoader").fadeIn(200); // show loader overlay
+            },
+            success: function (response) {
+                if (response.success) {
+                    goBack(); // redirect or handle success
+                } else {
+                    toastr.error(response.message || "Failed to save order.");
+                }
+            },
+            error: function (xhr) {
+                console.error(xhr.responseText);
+                toastr.error("Something went wrong while saving the order.");
+            },
+            complete: function () {
+                // Enable button and hide loader
+                $("#btnSaveOrder").prop("disabled", false).text("Save Order");
+                $("#pulseLoader").fadeOut(200); // hide loader overlay
+            }
+        });
+
+        }
+
+        
+
+
+    </script>
+</body>
+</html>

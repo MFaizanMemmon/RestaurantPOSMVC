@@ -6,5 +6,6 @@ namespace RestaurantManagementUI.View_Models
     public class StaffViewModel : tbl_Staff
     {
         public IEnumerable<SelectListItem>? Roles { get; set; }
+      
     }
 }

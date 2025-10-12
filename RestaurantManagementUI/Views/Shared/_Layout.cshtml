@@ -7,6 +7,10 @@
     <link href="~/bootswatch/pulse/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- Toastr CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+
+ 
 
     <link href="~/css/site.css" rel="stylesheet" />
 
@@ -16,6 +20,16 @@
     @{
         var username = Context.Session.GetString("Username") ?? "User";
     }
+      <div id="pulseLoader" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+    background: rgba(255,255,255,0.7); z-index:9999; text-align:center;">
+        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="mt-2 fw-bold">Saving Order...</div>
+        </div>
+    </div>
+
     
     <header style="max-height: 10vh;">
         <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
@@ -78,7 +92,7 @@
                 </button>
                 <ul class="navbar-nav flex-column flex-grow-1 mt-3">
                     <li class="nav-item">
-                        <a class="nav-link" asp-action="Index" asp-controller="Home" title="Dashboard">
+                        <a class="nav-link" asp-action="AdminDashboard" asp-controller="PointOfSale" title="Dashboard">
                             <i class="bi bi-house-door me-2"></i> <span>Dashboard</span>
                         </a>
                     </li>
@@ -103,12 +117,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="POS" title="POS">
+                        <a class="nav-link" asp-controller="PointOfSale" asp-action="GetAllOrders" title="Point Of Sale">
                             <i class="bi bi-cash-stack me-2"></i> <span>POS</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="KOT" asp-action="Index" title="KOT">
+                        <a class="nav-link" asp-controller="KOT" asp-action="Index" title="Kitchen Order Ticket">
                             <i class="bi bi-journal-check me-2"></i> <span>KOT</span>
                         </a>
                     </li>
@@ -129,9 +143,6 @@
         </div>
     </div>
 
- @*    <div class="loader-container">
-        <span class="loader"></span>
-    </div> *@
 
     @await Html.PartialAsync("_PopupPartail")
 
@@ -154,9 +165,59 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+
+    <script>
+        $(document).ready(function () {
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": true,
+                "progressBar": true,
+                "positionClass": "toast-bottom-right",
+                "preventDuplicates": false,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "3000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+
+        @* Success Message *@
+        @if (TempData["Success"] != null)
+        {
+            var successMessage = TempData["Success"].ToString().Replace("\"", "\\\""); // escape quotes
+            <text>
+                        var message = "@successMessage";
+                        if (message.toLowerCase().includes("delete")) {
+                            toastr.error(message, "Warning"); // Danger style
+                        } else {
+                            toastr.success(message, "Success"); // Normal success
+                        }
+            </text>
+        }
+
+        @* Error Message *@
+        @if (TempData["Error"] != null)
+        {
+            var errorMessage = TempData["Error"].ToString().Replace("\"", "\\\"");
+            <text>
+                        toastr.error("@errorMessage", "Error");
+            </text>
+        }
+        });
+    </script>
+
+
+
 </body>
 
 </html>

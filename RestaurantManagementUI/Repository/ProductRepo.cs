@@ -29,7 +29,7 @@ namespace RestaurantManagementUI.Repository
 
         public async Task<PorductViewModel> GetProductByID(int? id)
         {
-            string query = "SELECT * FROM tbl_Product WHERE ProductID = @ProductID";
+            string query = "SELECT * FROM Product WHERE ProductID = @ProductID";
             return await _connection.QueryFirstOrDefaultAsync<PorductViewModel>(query, new { ProductID = id }, transaction: _transaction);
         }
 

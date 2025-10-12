@@ -4,6 +4,8 @@ using RestaurantManagementUI.Models;
 using RestaurantManagementUI.Repository;
 using RestaurantManagementUI.Unit_of_work;
 using RestaurantManagementUI.View_Models;
+using System.Globalization;
+using System.Numerics;
 
 namespace RestaurantManagementUI.Controllers
 {
@@ -16,6 +18,37 @@ namespace RestaurantManagementUI.Controllers
             _unitOfWork = unitOfWork;
         }
 
+        public IActionResult AdminDashboard()
+        {
+            ViewBag.TotalOrders = 120;
+            ViewBag.RevenueToday = 950.50;
+            ViewBag.ActiveTables = 15;
+            ViewBag.PendingOrders = 8;
+
+            // Recent orders (sample list)
+            ViewBag.RecentOrders = new List<dynamic>
+            {
+                new { OrderID = 101, TableNo = 5, Items = "Pizza, Coke", Total = 25.50, Status = "Served", OrderTime = DateTime.Now.AddMinutes(-30) },
+                new { OrderID = 102, TableNo = 2, Items = "Burger, Fries", Total = 15.00, Status = "Pending", OrderTime = DateTime.Now.AddMinutes(-15) },
+                new { OrderID = 103, TableNo = 7, Items = "Pasta", Total = 12.50, Status = "Served", OrderTime = DateTime.Now.AddMinutes(-10) },
+            };
+
+            // Orders and Revenue last 7 days
+            ViewBag.OrdersLast7Days = new
+            {
+                Labels = new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" },
+                Data = new[] { 15, 18, 12, 20, 22, 25, 30 }
+            };
+
+            ViewBag.RevenueLast7Days = new
+            {
+                Labels = new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" },
+                Data = new[] { 150, 180, 120, 200, 220, 250, 300 }
+            };
+            return View();
+        }
+
+        #region Category
         [HttpGet]
         public async Task<IActionResult> CategoryList()
         {
@@ -37,10 +70,21 @@ namespace RestaurantManagementUI.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> CategoryCreate(tbl_Category category)
+        public async Task<IActionResult> CategoryCreate([FromBody] tbl_Category category)
         {
             try
             {
+             
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+
+                    return Json(new { success = false, message = "Validation failed.", errors });
+                }
+
                 _unitOfWork.BeginTransaction();
 
                 if (category.CategoryID == 0)
@@ -55,15 +99,18 @@ namespace RestaurantManagementUI.Controllers
                 }
 
                 _unitOfWork.CommitTransaction();
+
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
                 _unitOfWork.RollbackTransaction();
                 TempData["Error"] = ex.Message;
+                return Json(new { success = false, message = ex.Message });
             }
-
-            return RedirectToAction("CategoryList");
         }
+
+
 
 
 
@@ -86,6 +133,9 @@ namespace RestaurantManagementUI.Controllers
 
             return RedirectToAction("CategoryList");
         }
+        #endregion
+
+        #region Product
 
         [HttpGet]
         public async Task<IActionResult> ProductList()
@@ -98,9 +148,13 @@ namespace RestaurantManagementUI.Controllers
         public async Task<IActionResult> ProductAddEdit(int? id)
         {
             var product = new PorductViewModel();
-          
-            var categories = await _unitOfWork.Categories.GetAllCategory();
 
+
+
+            if (id != null)
+                product = await _unitOfWork.Products.GetProductByID(id);
+
+            var categories = await _unitOfWork.Categories.GetAllCategory();
             product.Categories = categories
                 .Select(c => new SelectListItem
                 {
@@ -109,9 +163,7 @@ namespace RestaurantManagementUI.Controllers
                 })
                 .ToList();
 
-            if (id != null)
-                product = await _unitOfWork.Products.GetProductByID(id);
-         
+
             return PartialView("_ProductAddEdit", product);
         }
         [HttpPost]
@@ -121,7 +173,7 @@ namespace RestaurantManagementUI.Controllers
             {
                 _unitOfWork.BeginTransaction();
 
-                string imageUrl = product.ImageUrl; // keep existing if edit
+                string imageUrl = product.ImageUrl; // Keep old image if editing
 
                 // ✅ Handle new image upload
                 if (product.ProductUrl != null && product.ProductUrl.Length > 0)
@@ -133,7 +185,7 @@ namespace RestaurantManagementUI.Controllers
                     string fileName = $"{Guid.NewGuid()}{Path.GetExtension(product.ProductUrl.FileName)}";
                     string filePath = Path.Combine(folderPath, fileName);
 
-                    // Delete old image (if any)
+                    // Delete old image if exists
                     if (!string.IsNullOrEmpty(imageUrl))
                     {
                         string oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", imageUrl.TrimStart('/'));
@@ -141,7 +193,6 @@ namespace RestaurantManagementUI.Controllers
                             System.IO.File.Delete(oldPath);
                     }
 
-                    // Save new file
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await product.ProductUrl.CopyToAsync(stream);
@@ -155,7 +206,7 @@ namespace RestaurantManagementUI.Controllers
                 {
                     ProductID = product.ProductID,
                     ProductName = product.ProductName,
-                    ProductPrice = (int)product.Price,
+                    ProductPrice = (int)product.ProductPrice,
                     CategoryId = product.CategoryID,
                     ImageUrl = imageUrl
                 };
@@ -173,15 +224,17 @@ namespace RestaurantManagementUI.Controllers
                 }
 
                 _unitOfWork.CommitTransaction();
+
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
                 _unitOfWork.RollbackTransaction();
                 TempData["Error"] = ex.Message;
+                return Json(new { success = false, message = ex.Message });
             }
-
-            return RedirectToAction("ProductList");
         }
+
 
 
         public async Task<IActionResult> DeleteProduct(int id)
@@ -203,7 +256,9 @@ namespace RestaurantManagementUI.Controllers
             return RedirectToAction("ProductList");
         }
 
+        #endregion
 
+        #region Table
         [HttpGet]
         public async Task<IActionResult> TableList()
         {
@@ -217,7 +272,7 @@ namespace RestaurantManagementUI.Controllers
             var table = new tbl_Table();
             if (id != null)
                 table = await _unitOfWork.Table.GetTableByID(Convert.ToInt32(id));
-           
+
             return PartialView("_TableAddEdit", table);
         }
         [HttpPost]
@@ -226,6 +281,7 @@ namespace RestaurantManagementUI.Controllers
             try
             {
                 _unitOfWork.BeginTransaction();
+
                 if (table.Tid == 0)
                 {
                     await _unitOfWork.Table.AddTable(table);
@@ -236,14 +292,17 @@ namespace RestaurantManagementUI.Controllers
                     await _unitOfWork.Table.UpdateTable(table);
                     TempData["Success"] = "Table updated successfully!";
                 }
+
                 _unitOfWork.CommitTransaction();
+
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
                 _unitOfWork.RollbackTransaction();
                 TempData["Error"] = ex.Message;
+                return Json(new { success = false, message = ex.Message });
             }
-            return RedirectToAction("TableList");
         }
 
         [HttpGet]
@@ -264,7 +323,9 @@ namespace RestaurantManagementUI.Controllers
             return RedirectToAction("TableList");
         }
 
+        #endregion
 
+        #region Staff
         [HttpGet]
         public async Task<IActionResult> StaffList()
         {
@@ -277,7 +338,7 @@ namespace RestaurantManagementUI.Controllers
         {
             var staff = new StaffViewModel();
             var role = await _unitOfWork.Staffs.GetAllRoles();
-           
+
             if (id != null)
                 staff = await _unitOfWork.Staffs.GetStaffByID(Convert.ToInt32(id));
 
@@ -291,11 +352,12 @@ namespace RestaurantManagementUI.Controllers
             return PartialView("_StaffAddEdit", staff);
         }
         [HttpPost]
-        public async Task<IActionResult> StaffAddEdit(StaffViewModel staff)
+        public async Task<IActionResult> StaffAddEdit([FromBody] StaffViewModel staff)
         {
             try
             {
                 _unitOfWork.BeginTransaction();
+
                 if (staff.StaffID == 0)
                 {
                     await _unitOfWork.Staffs.AddStaff(staff);
@@ -306,15 +368,20 @@ namespace RestaurantManagementUI.Controllers
                     await _unitOfWork.Staffs.UpdateStaff(staff);
                     TempData["Success"] = "Staff updated successfully!";
                 }
+
                 _unitOfWork.CommitTransaction();
+
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
                 _unitOfWork.RollbackTransaction();
                 TempData["Error"] = ex.Message;
+
+                return Json(new { success = false });
             }
-            return RedirectToAction("StaffList");
         }
+
 
         [HttpGet]
         public async Task<IActionResult> DeleteStaff(int? id)
@@ -333,7 +400,127 @@ namespace RestaurantManagementUI.Controllers
             }
             return RedirectToAction("StaffList");
         }
+
+
+
+
+
+        #endregion
+
+        #region POS Section
+
+        public async Task<ActionResult> GetAllOrders()
+        {
+           var order = await _unitOfWork.POS.GetAllOrders();
+            return View(order);
+        }
+
+        public async Task<IActionResult> AdminPOS()
+        {
+            var model = new AdminPOSViewModel();
+
+            // Get all products
+            var products = await _unitOfWork.Products.GetAllProduct();
+
+            // Map products
+            model.Products = products?
+                .Select(p => new tbl_Product
+                {
+                    ProductID = p.ProductID,
+                    ProductName = p.ProductName,
+                    ProductPrice = p.ProductPrice,
+                    CategoryId = p.CategoryID,
+                    ImageUrl = p.ImageUrl
+                })
+                .ToList() ?? new List<tbl_Product>();
+
+            // Map staff
+            var staffList = await _unitOfWork.Staffs.GetAllStaff() ?? Enumerable.Empty<tbl_Staff>();
+            model.Staff = staffList.Cast<tbl_Staff?>().ToList();
+
+            // Map categories
+            var categoryList = await _unitOfWork.Categories.GetAllCategory() ?? Enumerable.Empty<tbl_Category>();
+            model.Categories = categoryList.Cast<tbl_Category?>().ToList();
+
+            // Map tables
+            var tableList = await _unitOfWork.Table.GetAllTable() ?? Enumerable.Empty<tbl_Table>();
+            model.Tables = tableList.Cast<tbl_Table?>().ToList();
+
+            return View(model);
+        }
+
+
+        public async Task<IActionResult> WaiterOrderTaking()
+        {
+            var model = new AdminPOSViewModel();
+
+            // Get all products
+            var products = await _unitOfWork.Products.GetAllProduct();
+
+            // Map products
+            model.Products = products?
+                .Select(p => new tbl_Product
+                {
+                    ProductID = p.ProductID,
+                    ProductName = p.ProductName,
+                    ProductPrice = p.ProductPrice,
+                    CategoryId = p.CategoryID,
+                    ImageUrl = p.ImageUrl
+                })
+                .ToList() ?? new List<tbl_Product>();
+
+            // Map staff
+            var staffList = await _unitOfWork.Staffs.GetAllStaff() ?? Enumerable.Empty<tbl_Staff>();
+            model.Staff = staffList.Cast<tbl_Staff?>().ToList();
+
+            // Map categories
+            var categoryList = await _unitOfWork.Categories.GetAllCategory() ?? Enumerable.Empty<tbl_Category>();
+            model.Categories = categoryList.Cast<tbl_Category?>().ToList();
+
+            // Map tables
+            var tableList = await _unitOfWork.Table.GetAllTable() ?? Enumerable.Empty<tbl_Table>();
+            model.Tables = tableList.Cast<tbl_Table?>().ToList();
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateOrder([FromBody] ConfirmOrderViewModel order)
+        {
+            try
+            {
+
+                _unitOfWork.BeginTransaction();
+                int mainId = await _unitOfWork.POS.AddOrderHeader(order.OrderHeader);
+
+               
+                foreach (var detail in order.OrderDetail)
+                {
+                    detail.MainID = mainId;
+                }
+
+               
+                await _unitOfWork.POS.AddOrderDetail(order.OrderDetail);
+
+                _unitOfWork.CommitTransaction();
+                TempData["Success"] = "Order has been created!";
+                return Json(new { success = true, message = "Order created successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
+
+        #endregion
+
     }
 }
+
+
+
+
+
+
 
 

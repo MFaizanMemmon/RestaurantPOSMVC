@@ -1,0 +1,177 @@
+﻿@{
+    ViewBag.Title = "Restaurant Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0 text-primary">Restaurant Dashboard</h2>
+        <span class="text-muted small">@DateTime.Now.ToString("dddd, dd MMM yyyy")</span>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="row g-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body text-center">
+                    <div class="fs-2 text-primary fw-bold">@ViewBag.TotalOrders</div>
+                    <div class="text-muted">Total Orders</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body text-center">
+                    <div class="fs-2 text-success fw-bold">$@ViewBag.RevenueToday</div>
+                    <div class="text-muted">Revenue Today</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body text-center">
+                    <div class="fs-2 text-warning fw-bold">@ViewBag.ActiveTables</div>
+                    <div class="text-muted">Active Tables</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body text-center">
+                    <div class="fs-2 text-danger fw-bold">@ViewBag.PendingOrders</div>
+                    <div class="text-muted">Pending Orders</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row mt-5 g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white fw-bold">Orders (Last 7 Days)</div>
+                <div class="card-body">
+                    <canvas id="ordersChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white fw-bold">Revenue (Last 7 Days)</div>
+                <div class="card-body">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders Table -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                    <span>Recent Orders</span>
+                    <a href="#" class="text-primary small">View All</a>
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Table</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in ViewBag.RecentOrders)
+                            {
+                                <tr>
+                                    <td>@order.OrderID</td>
+                                    <td>@order.TableNo</td>
+                                    <td>@order.Items</td>
+                                    <td>$@order.Total</td>
+                                    <td>
+                                        <span class="badge bg-@((order.Status == "Pending") ? "warning" : (order.Status == "Completed") ? "success" : "secondary")">
+                                            @order.Status
+                                        </span>
+                                    </td>
+                                    <td>@order.OrderTime.ToString("dd-MMM-yyyy HH:mm")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        setDashboardDefaults();
+        // Orders Chart
+        const ctxOrders = document.getElementById('ordersChart').getContext('2d');
+        new Chart(ctxOrders, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(Json.Serialize(ViewBag.OrdersLast7Days.Labels)),
+                datasets: [{
+                    label: 'Orders',
+                    data: @Html.Raw(Json.Serialize(ViewBag.OrdersLast7Days.Data)),
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.15)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // Revenue Chart
+        const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctxRevenue, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(ViewBag.RevenueLast7Days.Labels)),
+                datasets: [{
+                    label: 'Revenue ($)',
+                    data: @Html.Raw(Json.Serialize(ViewBag.RevenueLast7Days.Data)),
+                    backgroundColor: 'rgba(255, 193, 7, 0.6)',
+                    borderColor: '#ffc107',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+         function setDashboardDefaults() {
+            // Set default active sidebar link
+            localStorage.setItem("activeSidebarLink", "/PointOfSale/AdminDashboard");
+        }
+
+
+
+    </script>
+}

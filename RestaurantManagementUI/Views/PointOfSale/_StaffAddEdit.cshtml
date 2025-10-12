@@ -1,6 +1,6 @@
 ﻿@model StaffViewModel
 
-<form id="StaffForm" asp-action="StaffAddEdit" asp-controller="PointOfSale">
+<form id="StaffForm" asp-action="StaffAddEdit" asp-controller="PointOfSale" method="post">
     @if (Model.StaffID != 0)
     {
         <input type="hidden" asp-for="StaffID" />
@@ -8,36 +8,79 @@
 
     <div class="mb-3">
         <label asp-for="StaffName" class="form-label">Name</label>
-        <input asp-for="StaffName" class="form-control" autocomplete="off" />
+        <input asp-for="StaffName" class="form-control" autocomplete="off" required />
         <span asp-validation-for="StaffName" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label asp-for="RoleID" class="form-label">Role</label>
-        <select asp-for="RoleID" class="form-select" asp-items="Model.Roles"></select>
+        <select asp-for="RoleID" class="form-select" asp-items="Model.Roles" required></select>
         <span asp-validation-for="RoleID" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label asp-for="StaffPhone" class="form-label">Phone</label>
-        <input asp-for="StaffPhone" class="form-control" autocomplete="off" />
+        <input asp-for="StaffPhone" class="form-control" autocomplete="off" required />
         <span asp-validation-for="StaffPhone" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label asp-for="UserName" class="form-label">User Name</label>
-        <input asp-for="UserName" class="form-control" autocomplete="off" />
+        <input asp-for="UserName" class="form-control" autocomplete="off" required />
         <span asp-validation-for="UserName" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label asp-for="UserPassword" class="form-label">Password</label>
-        <input asp-for="UserPassword" class="form-control" autocomplete="off" />
+        <input asp-for="UserPassword" class="form-control" autocomplete="off" required />
         <span asp-validation-for="UserPassword" class="text-danger"></span>
     </div>
 </form>
 
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-    <button type="submit" class="btn btn-primary" form="StaffForm">Save Staff</button>
+    <button type="submit" class="btn btn-primary" id="btnSaveStaff" form="StaffForm">Save Staff</button>
 </div>
+
+<script>
+        $("#StaffForm").on("submit", function (e) {
+        e.preventDefault();
+
+        var staff = {
+            StaffID: parseInt($("#StaffID").val()) || 0,
+            StaffName: $("#StaffName").val().trim(),
+            RoleID: parseInt($("#RoleID").val()),
+            StaffPhone: $("#StaffPhone").val().trim(),
+            UserName: $("#UserName").val().trim(),
+            UserPassword: $("#UserPassword").val().trim()
+        };
+
+        $.ajax({
+            url: '/PointOfSale/StaffAddEdit',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',  // important!
+            data: JSON.stringify(staff),                     // convert to JSON
+            dataType: 'json',
+
+            beforeSend: function () {
+                $("#btnSaveStaff").prop("disabled", true).text("Saving...");
+                $("#pulseLoader").fadeIn(200);
+            },
+
+            success: function (response) {
+                if (response.success) {
+
+                    location.reload();
+                } else {
+                    toastr.error(response.message || "Failed to save staff.");
+                }
+            },
+
+            error: function (xhr) {
+                toastr.error("Error: " + xhr.statusText);
+            }
+        });
+    });
+
+</script>
+

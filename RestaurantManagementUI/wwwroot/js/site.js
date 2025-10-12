@@ -140,7 +140,7 @@ $('.dt').each(function () {
 });
 
 function openModal(title, url, size = 'lg') {
-    debugger
+    
     const $modal = $('#mainModal');
     const $dialog = $modal.find('.modal-dialog');
 
@@ -157,10 +157,11 @@ function openModal(title, url, size = 'lg') {
    
     $('#modalLoader').show();
     $modal.modal('show');
-    $('#mainModalBody').empty();
+    //$('#mainModalBody').empty();
     // Load partial view content
     $.get(url)
         .done(function (data) {
+            $('#mainModalBody').empty();
             $('#mainModalBody').html(data);
 
         })

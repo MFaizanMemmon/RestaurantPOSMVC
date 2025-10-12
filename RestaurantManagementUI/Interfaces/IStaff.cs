@@ -12,6 +12,9 @@ namespace RestaurantManagementUI.Interfaces
         Task<int> AddStaff(StaffViewModel staffViewModel);
         Task<int> UpdateStaff(StaffViewModel staffViewModel);
         Task<int> DeleteStaff(int? id);
+        Task<tbl_Staff?> StaffLogin(string userName, string userPassword);
+
+     
 
     }
 }

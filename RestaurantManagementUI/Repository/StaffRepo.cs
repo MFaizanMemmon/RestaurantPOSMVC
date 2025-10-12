@@ -13,7 +13,7 @@ namespace RestaurantManagementUI.Repository
 
         public async Task<int> AddStaff(StaffViewModel staffViewModel)
         {
-           return await _connection.ExecuteAsync("insert into Staff (StaffName, StaffPhone, RoleID, StaffRole, UserName, UserPassword) values (@StaffName, @StaffPhone, @RoleID, @StaffRole, @UserName, @UserPassword)", staffViewModel, transaction: _transaction);
+            return await _connection.ExecuteAsync("insert into Staff (StaffName, StaffPhone, RoleID, StaffRole, UserName, UserPassword) values (@StaffName, @StaffPhone, @RoleID, @StaffRole, @UserName, @UserPassword)", staffViewModel, transaction: _transaction);
         }
 
         public async Task<int> DeleteStaff(int? id)
@@ -28,8 +28,21 @@ namespace RestaurantManagementUI.Repository
 
         public async Task<IEnumerable<tbl_Staff>> GetAllStaff()
         {
-            return await _connection.QueryAsync<tbl_Staff>("select * from Staff order by 1 desc", transaction: _transaction);
+            string query = @"
+                 SELECT 
+                 s.StaffID,
+                 s.StaffName,
+                 s.UserName,
+                 s.UserPassword,
+                 s.RoleID,
+                 r.RoleName as 'StaffRole'
+                    FROM Staff s
+                    LEFT JOIN tblRole r ON s.RoleID = r.RoleID
+                    ORDER BY s.StaffID DESC";
+
+            return await _connection.QueryAsync<tbl_Staff>(query, transaction: _transaction);
         }
+
 
         public async Task<StaffViewModel> GetStaffByID(int? id)
         {
@@ -45,6 +58,11 @@ namespace RestaurantManagementUI.Repository
         {
             _connection = transaction.Connection;
             _transaction = transaction;
+        }
+
+        public async Task<tbl_Staff?> StaffLogin(string userName, string userPassword)
+        {
+            return await _connection.QueryFirstOrDefaultAsync<tbl_Staff>("select * from Staff where UserName = @UserName and UserPassword = @UserPassword", new { UserName = userName, UserPassword = userPassword }, transaction: _transaction);
         }
 
         public async Task<int> UpdateStaff(StaffViewModel staffViewModel)

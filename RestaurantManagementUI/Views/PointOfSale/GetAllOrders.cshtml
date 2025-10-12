@@ -1,0 +1,80 @@
+﻿@model IEnumerable<RestaurantManagementUI.Models.tbl_Main>
+
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<div class="mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h3 class="mb-0">Orders</h3>
+        <a class="btn btn-primary" href="/PointOfSale/AdminPOS" >
+            <i class="bi bi-plus-circle me-1"></i> Add Order
+        </a>
+    </div>
+
+    <table id="orderTable" class="table table-hover mt-5 dt">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Order Type</th>
+                <th>Status</th>
+               
+              
+                <th>Total</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.MainID</td>
+                        <td>@item.Date.ToString("dd MMM yyyy")</td>
+                        @{
+                            DateTime dateTime = item.Time.HasValue
+                            ? DateTime.Today.Add(item.Time.Value)
+                            : DateTime.Today; 
+                        }
+                        <td>@dateTime.ToString("hh:mm tt")</td>
+
+                        <td>@item.OrderType</td>
+                        <td>
+                            <span class="badge @(item.Status == "Completed" ? "bg-success" : item.Status == "Pending" ? "bg-warning text-dark" : "bg-secondary")">
+                                @item.Status
+                            </span>
+                        </td>
+                       
+                       
+                        <td>Rs. @item.Total.ToString("N2")</td>
+                        <td>
+                            <button class="btn btn-sm btn-info"
+                                    onclick="openModal('View Order', '/PointOfSale/ViewOrder?id=@item.MainID','lg')">
+                                View
+                            </button>
+                            <button class="btn btn-sm btn-danger"
+                                    onclick="showConfirm({
+                                        title: 'Delete Order',
+                                        message: 'Are you sure you want to delete this order?',
+                                        confirmText: 'Delete',
+                                        cancelText: 'Cancel',
+                                        url: '/PointOfSale/DeleteOrder?id=@item.MainID'
+                                    })">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="12" class="text-center text-muted">No orders found</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

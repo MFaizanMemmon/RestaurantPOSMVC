@@ -20,14 +20,15 @@ namespace RestaurantManagementUI.Unit_of_work
         public ITable Table { get; }
 
         public IStaff Staffs { get;  }
-        public UnitOfWork(DBConnection dbConnection, ICategory categories, IProduct products,ITable table,IStaff staff)
+        public IPOS POS { get; }
+        public UnitOfWork(DBConnection dbConnection, ICategory categories, IProduct products,ITable table,IStaff staff,IPOS pos)
         {
             _connection = dbConnection.CreateConnection();
             Categories = categories;
             Products = products;
             Table = table;
             Staffs = staff;
-
+            POS = pos;
             if (Categories is IConnectionString catRepo)
             {
                 catRepo.SetConnection(_connection);
@@ -45,6 +46,10 @@ namespace RestaurantManagementUI.Unit_of_work
             if (Staffs is IConnectionString staffRepo)
             {
                 staffRepo.SetConnection(_connection);
+            }
+            if (POS is IConnectionString posRep)
+            {
+                posRep.SetConnection(_connection);
             }
 
         }
@@ -79,6 +84,11 @@ namespace RestaurantManagementUI.Unit_of_work
             {
                 staffRepo.SetConnection(_connection);
                 staffRepo.SetTransaction(_transaction);
+            }
+            if (POS is IConnectionString posRep)
+            {
+                posRep.SetConnection(_connection);
+                posRep.SetTransaction(_transaction);
             }
 
         }

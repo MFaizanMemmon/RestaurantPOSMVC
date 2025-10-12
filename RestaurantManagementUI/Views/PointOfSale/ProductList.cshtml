@@ -35,11 +35,17 @@
 
 
                         <td>@item.CategoryName</td>
-                        <td>@String.Format(new CultureInfo("en-PK"), "{0:C}", item.Price)</td>
+                        <td>@String.Format(new CultureInfo("en-PK"), "{0:C}", item.ProductPrice)</td>
                         <td>
                             @if (!string.IsNullOrEmpty(item.ImageUrl))
                             {
-                                <img src="@Url.Content(item.ImageUrl)" alt="Menu Image" class="img-thumbnail" style="width:100px; height:100px; object-fit:cover;" />
+                                <img src="@Url.Content(!string.IsNullOrEmpty(item.ImageUrl)
+                                    ? item.ImageUrl
+                                    : "~/images/no-image.png")"
+                                     alt="@item.ProductName"
+                                     class="img-thumbnail"
+                                     style="width:100px; height:100px; object-fit:cover;" />
+
                             }
                             else
                             {
@@ -47,7 +53,10 @@
                             }
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-info" >Edit</button>
+                            <button class="btn btn-sm btn-info"
+                                    onclick="openModal('Edit Menu', '/PointOfSale/ProductAddEdit?id=@item.ProductID','lg')">
+                                Edit
+                            </button>
                             <button class="btn btn-sm btn-danger" onclick="showConfirm({
                                     title: 'Delete Menu',
                                     message: 'Are you sure you want to delete this menu?',
@@ -72,56 +81,3 @@
 </div>
 
 
-@section scripts {
-    <script>
-
-
-        // Edit/Delete functions
-        function editRow(button) {
-            const row = button.closest("tr");
-            const name = row.cells[1].innerText;
-            const price = row.cells[2].innerText.replace("$", "");
-            const category = row.cells[3].innerText;
-
-            document.getElementById("menuName").value = name;
-            document.getElementById("menuPrice").value = price;
-            document.getElementById("menuCategory").value = category;
-            document.getElementById("productModalLabel").innerText = "Edit Product";
-
-            var modal = new bootstrap.Modal(document.getElementById('productModal'));
-            modal.show();
-        }
-
-        function deleteRow(button) {
-            if (confirm("Are you sure you want to delete this product?")) {
-                const row = button.closest("tr");
-                row.remove();
-            }
-        }
-
-        // Reset modal on close
-        document.getElementById('productModal').addEventListener('hidden.bs.modal', function () {
-            document.getElementById("productForm").reset();
-            document.getElementById("productModalLabel").innerText = "Add New Product";
-        });
-
-                // Show image preview on file select
-        document.getElementById("menuPicture").addEventListener("change", function (event) {
-            const file = event.target.files[0];
-            const preview = document.getElementById("menuPicturePreview");
-
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    preview.src = e.target.result;
-                    preview.style.display = "block"; // show the image
-                }
-                reader.readAsDataURL(file);
-            } else {
-                preview.src = "#";
-                preview.style.display = "none";
-            }
-        });
-
-    </script>
-}

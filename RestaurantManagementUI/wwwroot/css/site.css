@@ -267,3 +267,13 @@ main {
         box-shadow: .2em -.2em 0 0 currentcolor;
     }
 }
+
+.toast-success {
+    background-color: #6610f2 !important; /* Pulse primary color */
+    color: #fff !important;
+}
+
+.toast-error {
+    background-color: #dc3545 !important; /* Bootstrap danger */
+    color: #fff !important;
+}
