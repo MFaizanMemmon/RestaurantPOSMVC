@@ -2,6 +2,7 @@
 using RestaurantManagementUI.Data;
 using RestaurantManagementUI.Interfaces;
 using RestaurantManagementUI.Models;
+using RestaurantManagementUI.View_Models;
 using System.Data;
 using System.Data.Common;
 
@@ -54,6 +55,91 @@ namespace RestaurantManagementUI.Repository
 
             return await _connection.ExecuteAsync(query, details, _transaction);
         }
+
+
+
+        public async Task<IEnumerable<OrderDetailViewModel>> GetAllOrderDetail()
+        {
+            string query = @"select d.*,p.ProductName from TblDetail d 
+                            inner join Product p on p.ProductID = d.ProID";
+            return await _connection.QueryAsync<OrderDetailViewModel>(query);
+        }
+
+        public async Task<tbl_Main> GetOrderHeaderByID(int id)
+        {
+            const string query = @"
+                            SELECT *
+                            FROM tblMain
+                            WHERE MainID = @id";
+
+            var result = await _connection.QueryFirstOrDefaultAsync<tbl_Main>(
+                query,
+                new { id },
+                transaction: _transaction
+            );
+
+            return result;
+        }
+        public async Task<int> UpdateOrderHeader(tbl_Main header)
+        {
+            const string query = @"
+        UPDATE tblMain
+        SET
+            Date = ISNULL(@Date, Date),
+            TableName = ISNULL(@TableName, TableName),
+            WaiterName = ISNULL(@WaiterName, WaiterName),
+            Status = ISNULL(@Status, Status),
+            OrderType = ISNULL(@OrderType, OrderType),
+            Total = ISNULL(@Total, Total),
+            Recieved = ISNULL(@Recieved, Recieved),
+            [Change] = ISNULL(@Change, [Change]),
+            DriverID = ISNULL(@DriverID, DriverID),
+            CustName = ISNULL(@CustName, CustName),
+            CustPhone = ISNULL(@CustPhone, CustPhone),
+            IsPrint = ISNULL(@IsPrint, IsPrint),
+            IsPrintUnPaid = ISNULL(@IsPrintUnPaid, IsPrintUnPaid),
+            PaidDateTime = ISNULL(@PaidDateTime, PaidDateTime)
+        WHERE MainID = @MainID;
+        
+        SELECT @MainID;";
+
+            var result = await _connection.QuerySingleAsync<int>(query, header, _transaction);
+            return result;
+        }
+
+        public async Task<int> UpdateReceivedPayment(int mainId, decimal received, decimal change, int masterConfigParentId)
+        {
+            string query = @"
+        UPDATE tblMain
+        SET 
+            Recieved = @Recieved,
+            [Change] = @Change,
+            MasterConfigParentID = @MasterConfigParentID,
+            Status = 'Paid',
+            PaidDateTime = GETDATE()
+        WHERE MainID = @MainID;
+        SELECT @MainID;";
+
+            var parameters = new
+            {
+                MainID = mainId,
+                Recieved = received,
+                Change = change,
+                MasterConfigParentID = masterConfigParentId
+            };
+
+            try
+            {
+                return await _connection.QuerySingleAsync<int>(query, parameters, _transaction);
+            }
+            catch (Exception ex)
+            {
+               
+                throw ex;
+            }
+        }
+
+
 
     }
 }

@@ -24,12 +24,14 @@
 
             <div class="mb-3">
                 <label class="form-label">Category</label>
-                <select id="CategoryID" class="form-select" required>
-                    @foreach (var cat in Model.Categories)
-                    {
-                        <option value="@cat.Value" selected="@(cat.Value == Model.CategoryID.ToString())">@cat.Text</option>
-                    }
-                </select>
+                <div class="mb-3">
+                    <label asp-for="CategoryID" class="form-label">Category</label>
+                    <select asp-for="CategoryID" class="form-select" asp-items="Model.Categories" required>
+                        <option value="">-- Select Category --</option>
+                    </select>
+                    <span asp-validation-for="CategoryID" class="text-danger"></span>
+                </div>
+
                 <span id="CategoryError" class="text-danger"></span>
             </div>
 

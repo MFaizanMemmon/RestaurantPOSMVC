@@ -157,6 +157,128 @@
             .back-btn:hover {
                 color: var(--bs-dark);
             }
+
+        /* === MOBILE RESPONSIVENESS === */
+        @@media (max-width: 992px) {
+            body
+
+        {
+            overflow: auto;
+        }
+
+        .pos-content {
+            flex-direction: column;
+        }
+
+        .product-area {
+            flex: 1;
+            padding: 0.75rem;
+        }
+
+        .category-bar {
+            gap: 0.4rem;
+            padding-bottom: 0.75rem;
+        }
+
+        .product-grid {
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px;
+        }
+
+        .product-card img {
+            height: 100px;
+        }
+
+        .order-panel {
+            width: 100%;
+            border-left: none;
+            border-top: 2px solid rgba(0,0,0,0.05);
+            max-height: 50vh;
+            position: sticky;
+            bottom: 0;
+            z-index: 999;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+        }
+
+        .order-header, .order-footer {
+            padding: 0.75rem;
+        }
+
+        .order-items {
+            padding: 0.5rem 0.75rem;
+        }
+
+        .order-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .qty-controls {
+            margin-top: 4px;
+        }
+
+        .pos-toolbar {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.5rem;
+        }
+
+            .pos-toolbar input {
+                flex: 1;
+                max-width: 100% !important;
+            }
+
+        .back-btn {
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            font-size: 0.9rem;
+            padding: 0.4rem 0.75rem;
+        }
+
+        /* Improve scroll usability on mobile */
+        .product-grid, .order-items {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        }
+
+        /* FIX CATEGORY BAR HEIGHT ON MOBILE & DESKTOP */
+        .category-bar {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            overflow-y: hidden;
+            height: 50px; /* fixed height */
+            min-height: 50px; /* ensures it doesn't shrink */
+            padding: 0.5rem 0.25rem;
+            align-items: center; /* center buttons vertically */
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+            .category-bar button {
+                flex: 0 0 auto; /* prevent shrinking */
+                white-space: nowrap;
+                padding: 0.35rem 0.75rem;
+                border-radius: 20px;
+                scroll-snap-align: start;
+            }
+
+        /* Optional: mobile adjustments */
+        @@media (max-width: 992px) {
+            .category-bar
+
+        {
+            height: 50px;
+        }
+
+        .category-bar button {
+            font-size: 0.85rem;
+        }
+
+        }
     </style>
 </head>
 
@@ -236,6 +358,12 @@
    
 
     <script>
+                // Scroll first active category into view on mobile
+        document.addEventListener("DOMContentLoaded", function() {
+            const activeBtn = document.querySelector('.category-bar button.active');
+            if(activeBtn) activeBtn.scrollIntoView({ behavior: "smooth", inline: "start" });
+        });
+
         const order = { items: [] };
 
         function addToOrder(id, name, price) {

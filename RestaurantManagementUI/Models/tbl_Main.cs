@@ -21,6 +21,8 @@
         public bool IsPrintUnPaid { get; set; }
         public DateTime? PaidDateTime { get; set; }
 
+        public int MasterConfigParentID { get; set; }
+
 
     }
 }

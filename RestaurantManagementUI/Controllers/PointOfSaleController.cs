@@ -74,7 +74,7 @@ namespace RestaurantManagementUI.Controllers
         {
             try
             {
-             
+
                 if (!ModelState.IsValid)
                 {
                     var errors = ModelState.Values
@@ -411,11 +411,14 @@ namespace RestaurantManagementUI.Controllers
 
         public async Task<ActionResult> GetAllOrders()
         {
-           var order = await _unitOfWork.POS.GetAllOrders();
-            return View(order);
+            GetAllOrdersViewModel getAllOrders = new GetAllOrdersViewModel();
+            getAllOrders.OrderHeader = await _unitOfWork.POS.GetAllOrders();
+            getAllOrders.OrderDetails = await _unitOfWork.POS.GetAllOrderDetail();
+            return View(getAllOrders);
         }
 
-        public async Task<IActionResult> AdminPOS()
+
+        public async Task<IActionResult> AdminPOS(int? id)
         {
             var model = new AdminPOSViewModel();
 
@@ -448,6 +451,59 @@ namespace RestaurantManagementUI.Controllers
 
             return View(model);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateReceivedPayment([FromBody] tbl_Main header)
+        {
+            if (header == null || header.MainID == 0)
+                return BadRequest(new { success = false, message = "Invalid order header data." });
+
+            try
+            {
+                var updatedId = await _unitOfWork.POS.UpdateReceivedPayment(
+                    header.MainID,
+                    header.Recieved,
+                    header.Change,
+                    header.MasterConfigParentID
+                );
+
+                if (updatedId > 0)
+                    return Json(new { success = true, message = "Payment received successfully!", id = updatedId });
+                else
+                    return Json(new { success = false, message = "Payment update failed." });
+            }
+            catch (Exception ex)
+            {
+              
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+
+
+        public async Task<IActionResult> ReceivedPayment(int id)
+        {
+            ReceivedPaymentViewModel receivedPaymentViewModel = new ReceivedPaymentViewModel();
+            var masterConfig = await _unitOfWork.MasterConfig.GetAllMasterConfigByParentID(1);
+
+
+            receivedPaymentViewModel.PaymentTypeList = masterConfig
+                .Select(mc => new SelectListItem
+                {
+                    Value = mc.ConfigID.ToString(),
+                    Text = mc.ConfigName
+                })
+                .ToList();
+
+            tbl_Main main = new tbl_Main();
+            main = await _unitOfWork.POS.GetOrderHeaderByID(id);
+
+            receivedPaymentViewModel.MainID = main.MainID;
+            receivedPaymentViewModel.TotalAmount = main.Total;
+
+            return View("_ReceivedPayment", receivedPaymentViewModel);
+        }
+
 
 
         public async Task<IActionResult> WaiterOrderTaking()
@@ -493,13 +549,13 @@ namespace RestaurantManagementUI.Controllers
                 _unitOfWork.BeginTransaction();
                 int mainId = await _unitOfWork.POS.AddOrderHeader(order.OrderHeader);
 
-               
+
                 foreach (var detail in order.OrderDetail)
                 {
                     detail.MainID = mainId;
                 }
 
-               
+
                 await _unitOfWork.POS.AddOrderDetail(order.OrderDetail);
 
                 _unitOfWork.CommitTransaction();
@@ -510,6 +566,14 @@ namespace RestaurantManagementUI.Controllers
             {
                 return Json(new { success = false, message = "Error: " + ex.Message });
             }
+        }
+
+        public async Task<ActionResult> KOT()
+        {
+            GetAllOrdersViewModel getAllOrders = new GetAllOrdersViewModel();
+            getAllOrders.OrderHeader = await _unitOfWork.POS.GetAllOrders();
+            getAllOrders.OrderDetails = await _unitOfWork.POS.GetAllOrderDetail();
+            return View(getAllOrders);
         }
 
         #endregion

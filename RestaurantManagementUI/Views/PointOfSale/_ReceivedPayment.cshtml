@@ -1,0 +1,97 @@
+﻿@model RestaurantManagementUI.View_Models.ReceivedPaymentViewModel
+
+@{
+    Layout = null;
+}
+
+<input type="hidden" asp-for="MainID" id="MainID" />
+
+<div class="mb-3">
+    <label asp-for="PaymentTypeID" class="form-label">Payment Type</label>
+    <select asp-for="PaymentTypeID" id="PaymentTypeID" class="form-select" asp-items="Model.PaymentTypeList" required></select>
+    <span asp-validation-for="PaymentTypeID" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="TotalAmount" class="form-label">Total Amount</label>
+    <input asp-for="TotalAmount" id="TotalAmount" class="form-control" readonly />
+</div>
+
+<div class="mb-3">
+    <label asp-for="ReceivedAmount" class="form-label">Received Amount</label>
+    <input asp-for="ReceivedAmount" id="ReceivedAmount" class="form-control" placeholder="Enter received amount" />
+    <span asp-validation-for="ReceivedAmount" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="ReturnAmount" class="form-label">Return Amount</label>
+    <input asp-for="ReturnAmount" id="ReturnAmount" class="form-control" readonly />
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="button" class="btn btn-primary" id="btnSavePayment">Save Payment</button>
+</div>
+
+<script>
+    // 🔹 Calculate Return Amount dynamically
+    $("#ReceivedAmount").on("input", function () {
+        var total = parseFloat($("#TotalAmount").val()) || 0;
+        var received = parseFloat($(this).val()) || 0;
+        var returnAmt = received - total;
+        $("#ReturnAmount").val(returnAmt > 0 ? returnAmt.toFixed(2) : "0.00");
+    });
+
+    // 🔹 Save Payment via AJAX
+    $("#btnSavePayment").click(function () {
+        var data = {
+            MainID: parseInt($("#MainID").val()) || 0,
+            Recieved: parseFloat($("#ReceivedAmount").val()) || 0,
+            Change: parseFloat($("#ReturnAmount").val()) || 0,
+            Status: "Paid",
+            PaidDateTime: $("#PaymentTypeID").val() ? new Date().toISOString().slice(0, 19) : null
+
+        };
+
+        if (data.MainID === 0) {
+            toastr.error("Order ID is missing.");
+            return;
+        }
+
+        if (data.Recieved <= 0) {
+            toastr.error("Please enter a valid received amount.");
+            return;
+        }
+
+            $.ajax({
+                url: '/PointOfSale/UpdateReceivedPayment',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    MainID: parseInt($("#MainID").val()),
+                    Recieved: parseFloat($("#ReceivedAmount").val()) || 0,
+                    Change: parseFloat($("#ReturnAmount").val()) || 0,
+                    MasterConfigParentID: parseInt($("#MasterConfigParentID").val()) || 0
+                }),
+                dataType: 'json',
+                beforeSend: function () {
+                    $("#btnSavePayment").prop("disabled", true).text("Saving...");
+                },
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        location.reload();
+                    } else {
+                        toastr.error(response.message);
+                    }
+                },
+                error: function (xhr) {
+                    toastr.error("Error: " + xhr.responseText);
+                },
+                complete: function () {
+                    $("#btnSavePayment").prop("disabled", false).text("Save Payment");
+                }
+            });
+
+    });
+</script>

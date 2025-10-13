@@ -11,6 +11,7 @@ namespace RestaurantManagementUI.Unit_of_work
         IStaff Staffs { get; }
 
         IPOS POS { get; }
+        IMasterConfig MasterConfig { get; }
 
         void BeginTransaction();
         void CommitTransaction();

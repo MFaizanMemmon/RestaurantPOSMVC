@@ -21,7 +21,7 @@ builder.Services.AddScoped<IProduct, ProductRepo>();
 builder.Services.AddScoped<ITable, TableRepo>();
 builder.Services.AddScoped<IStaff, StaffRepo>();
 builder.Services.AddScoped<IPOS, POSRepo>();
-
+builder.Services.AddScoped<IMasterConfig, MasterConfigRepo>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 

@@ -1,0 +1,100 @@
+﻿@model GetAllOrdersViewModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h3 class="mb-4 text-primary">Kitchen Order Ticket </h3>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        @foreach (var order in Model.OrderHeader)
+        {
+            var items = Model.OrderDetails.Where(d => d.MainID == order.MainID).ToList();
+            <div class="col">
+                <div class="card h-100 shadow-sm" id="orderCard_@order.MainID">
+
+                    <!-- Card Header -->
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <div>
+                            Order #@order.MainID — @order.TableName
+                        </div>
+                        <div>
+                            <small id="orderTime_@order.MainID">
+                                @(
+                                    order.Time.HasValue
+                                    ? DateTime.Today.Add(order.Time.Value).ToString("hh:mm tt")
+                                    : "--:--"
+                                    )
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                        @for (int i = 0; i < items.Count; i++)
+                        {
+                            var item = items[i];
+                            var borderClass = i < 5 ? "border-primary" : "border-secondary";
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded @borderClass">
+                                <span class="fw-semibold">@item.ProductName</span>
+                                <span class="badge bg-secondary">@item.Qty</span>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Card Footer -->
+                    <div class="card-footer d-flex justify-content-between align-items-center" id="footer_@order.MainID">
+                        <button class="btn btn-success btn-sm" id="acceptBtn_@order.MainID" onclick="startTimer(@order.MainID)">
+                            <i class="bi bi-check-circle me-1"></i> Accept
+                        </button>
+
+                        <!-- Timer span, hidden initially -->
+                        <div id="timer_@order.MainID" style="display:none;">
+                            <span class="fw-bold text-success">Accepted:</span>
+                            <span id="elapsed_@order.MainID">00:00:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        const timers = {};
+
+        function startTimer(orderId) {
+            // Hide Accept button
+            const acceptBtn = document.getElementById('acceptBtn_' + orderId);
+            acceptBtn.style.display = 'none';
+
+            // Show timer div
+            document.getElementById('timer_' + orderId).style.display = 'block';
+
+            // Add Completed button inside footer
+            const footer = document.getElementById('footer_' + orderId);
+            const completedBtn = document.createElement('button');
+            completedBtn.className = 'btn btn-primary btn-sm';
+            completedBtn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Completed';
+            completedBtn.onclick = () => {
+                clearInterval(timers[orderId]); // stop timer
+                footer.innerHTML = '<span class="text-success fw-bold">Order Completed</span>';
+            };
+            footer.appendChild(completedBtn);
+
+            // Start timer
+            const startTime = new Date();
+            timers[orderId] = setInterval(() => {
+                const now = new Date();
+                let diff = Math.floor((now - startTime) / 1000);
+                const hours = String(Math.floor(diff / 3600)).padStart(2, '0');
+                diff %= 3600;
+                const minutes = String(Math.floor(diff / 60)).padStart(2, '0');
+                const seconds = String(diff % 60).padStart(2, '0');
+                document.getElementById('elapsed_' + orderId).textContent = `${hours}:${minutes}:${seconds}`;
+            }, 1000);
+        }
+    </script>
+}
