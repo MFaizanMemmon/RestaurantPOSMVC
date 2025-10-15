@@ -144,18 +144,28 @@ function openModal(title, url, size = 'lg') {
     const $modal = $('#mainModal');
     const $dialog = $modal.find('.modal-dialog');
 
+   
     // Remove previous size classes
     $dialog.removeClass('modal-sm modal-md modal-lg modal-xl modal-xxl');
 
     // Add new size class dynamically
     if (size) $dialog.addClass(`modal-${size}`);
 
-    // Set title
+    // Set modal title
     $('#mainModalTitle').text(title);
 
-    
-   
+    // Clear and set modal body with loader
+    $('#mainModalBody').empty();
+    $('#mainModalBody').html(
+        '<div class="text-center p-4" id="modalLoader">' +
+        '<div class="spinner-border text-primary" role="status"></div>' +
+        '<p class="mt-2 text-primary">Loading...</p>' +
+        '</div>'
+    );
+
     $('#modalLoader').show();
+
+
     $modal.modal('show');
     //$('#mainModalBody').empty();
     // Load partial view content

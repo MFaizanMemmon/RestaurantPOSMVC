@@ -6,6 +6,9 @@ using RestaurantManagementUI.Unit_of_work;
 using RestaurantManagementUI.View_Models;
 using System.Globalization;
 using System.Numerics;
+using System.Text.Json;
+using System.IO;
+using Microsoft.Extensions.Configuration;
 
 namespace RestaurantManagementUI.Controllers
 {
@@ -16,7 +19,7 @@ namespace RestaurantManagementUI.Controllers
         public PointOfSaleController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-        }
+        } 
 
         public IActionResult AdminDashboard()
         {
@@ -474,7 +477,7 @@ namespace RestaurantManagementUI.Controllers
             }
             catch (Exception ex)
             {
-              
+
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
@@ -577,6 +580,12 @@ namespace RestaurantManagementUI.Controllers
         }
 
         #endregion
+
+
+
+     
+
+
 
     }
 }

@@ -19,7 +19,7 @@
 
 <div class="mb-3">
     <label asp-for="ReceivedAmount" class="form-label">Received Amount</label>
-    <input asp-for="ReceivedAmount" id="ReceivedAmount" class="form-control" placeholder="Enter received amount" />
+    <input asp-for="ReceivedAmount" id="ReceivedAmount" class="form-control" placeholder="Enter received amount" autocomplete="off" />
     <span asp-validation-for="ReceivedAmount" class="text-danger"></span>
 </div>
 
@@ -34,6 +34,7 @@
 </div>
 
 <script>
+    $('#ReceivedAmount').focus();
     // 🔹 Calculate Return Amount dynamically
     $("#ReceivedAmount").on("input", function () {
         var total = parseFloat($("#TotalAmount").val()) || 0;

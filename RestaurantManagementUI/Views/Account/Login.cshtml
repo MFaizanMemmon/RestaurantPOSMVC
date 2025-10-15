@@ -12,12 +12,65 @@
         background: linear-gradient(135deg, #3b82f6, #0ea5e9, #14b8a6);
         height: 100vh;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         font-family: "Poppins", sans-serif;
         overflow: hidden;
     }
 
+    /* ===== Branding Section ===== */
+    .brand-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 1.5rem;
+        animation: fadeInDown 0.8s ease;
+    }
+
+    .brand-icon {
+        font-size: 2rem;
+    }
+
+    .brand-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+        text-align: left;
+    }
+
+    .brand-name {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #ffffff;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .brand-tagline {
+        font-size: 0.85rem;
+        color: #dbeafe;
+        font-weight: 400;
+        letter-spacing: 0.3px;
+    }
+
+    @@keyframes fadeInDown {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    /* ===== Login Card ===== */
     .login-card {
         width: 380px;
         background: #ffffff;
@@ -101,16 +154,7 @@
         color: #b91c1c;
     }
 
-    .brand-text {
-        font-weight: 700;
-        color: #fff;
-        font-size: 1.8rem;
-        letter-spacing: 1px;
-        text-align: center;
-        margin-bottom: 1rem;
-        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-
+    /* Pulse Glow Animation */
     .pulse-shadow {
         animation: pulseGlow 2s infinite;
     }
@@ -134,7 +178,13 @@
 </style>
 
 <div>
-    <div class="brand-text">🍽️ Pulse Restaurant</div>
+    <div class="brand-logo">
+        <div class="brand-icon">🍽️</div>
+        <div class="brand-text">
+            <span class="brand-name">Pulse POS</span>
+            <small class="brand-tagline">The Restaurant Solution</small>
+        </div>
+    </div>
 
     <div class="login-card pulse-shadow">
         <div class="login-header">
@@ -176,4 +226,3 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-

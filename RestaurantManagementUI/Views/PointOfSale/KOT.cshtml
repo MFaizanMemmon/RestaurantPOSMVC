@@ -1,7 +1,10 @@
 ﻿@model GetAllOrdersViewModel
 
 @{
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = Context.Session.GetInt32("RoleID") == 1004
+    ? "~/Views/Shared/_LayoutChief.cshtml"
+    : "~/Views/Shared/_Layout.cshtml";
+
 }
 
 <div class="container mt-4">

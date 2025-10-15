@@ -7,96 +7,96 @@
 
 <style>
     /* =============================
-           PROFESSIONAL PULSE-STYLE ICONS
-           ============================= */
+    PROFESSIONAL PULSE-STYLE ICONS
+    ============================= */
     td.details-control {
-        cursor: pointer;
-        text-align: center;
-        width: 45px;
-        vertical-align: middle;
+    cursor: pointer;
+    text-align: center;
+    width: 45px;
+    vertical-align: middle;
     }
 
     .details-control i {
-        font-size: 1.3rem;
-        color: #6f42c1; /* Pulse accent purple */
-        transition: all 0.3s ease;
-        opacity: 0.85;
-        background-color: #f3f0ff;
-        border-radius: 50%;
-        padding: 6px;
-        box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+    font-size: 1.3rem;
+    color: #6f42c1; /* Pulse accent purple */
+    transition: all 0.3s ease;
+    opacity: 0.85;
+    background-color: #f3f0ff;
+    border-radius: 50%;
+    padding: 6px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
     }
 
     .details-control:hover i {
-        transform: scale(1.15);
-        opacity: 1;
-        box-shadow: 0 0 10px rgba(111, 66, 193, 0.3);
+    transform: scale(1.15);
+    opacity: 1;
+    box-shadow: 0 0 10px rgba(111, 66, 193, 0.3);
     }
 
     tr.shown .details-control i {
-        background-color: #6610f2 !important;
-        color: #fff !important;
-        transform: rotate(180deg) !important;
-        box-shadow: 0 0 12px rgba(102, 16, 242, 0.4) !important;
+    background-color: #6610f2 !important;
+    color: #fff !important;
+    transform: rotate(180deg) !important;
+    box-shadow: 0 0 12px rgba(102, 16, 242, 0.4) !important;
     }
 
     /* =============================
-           CHILD SLIDER ANIMATION
-           ============================= */
+    CHILD SLIDER ANIMATION
+    ============================= */
     div.slider {
-        display: none;
-        overflow: hidden;
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        padding: 10px;
-        transition: all 0.3s ease;
+    display: none;
+    overflow: hidden;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 10px;
+    transition: all 0.3s ease;
     }
 
     /* =============================
-           INNER TABLE (CHILD)
-           ============================= */
+    INNER TABLE (CHILD)
+    ============================= */
     .inner-table {
-        font-size: 0.85rem;
+    font-size: 0.85rem;
     }
 
     /* Inner expandable table */
     .inner-table {
-        background-color: #f8f9fa !important; /* Light gray background */
-        border: 1px solid #dee2e6 !important;
-        border-radius: 0.5rem !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-        overflow: hidden !important;
+    background-color: #f8f9fa !important; /* Light gray background */
+    border: 1px solid #dee2e6 !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    overflow: hidden !important;
     }
 
-        .inner-table th {
-            background-color: #e9ecef !important; /* Light Pulse secondary tone */
-            color: #495057 !important;
-            font-weight: 600 !important;
-            border-color: #dee2e6 !important;
-            text-align: center !important;
-        }
+    .inner-table th {
+    background-color: #e9ecef !important; /* Light Pulse secondary tone */
+    color: #495057 !important;
+    font-weight: 600 !important;
+    border-color: #dee2e6 !important;
+    text-align: center !important;
+    }
 
-        .inner-table td {
-            background-color: #ffffff !important;
-            color: #343a40 !important;
-            border-color: #dee2e6 !important;
-            padding: 0.4rem 0.6rem !important;
-            vertical-align: middle !important;
-        }
+    .inner-table td {
+    background-color: #ffffff !important;
+    color: #343a40 !important;
+    border-color: #dee2e6 !important;
+    padding: 0.4rem 0.6rem !important;
+    vertical-align: middle !important;
+    }
 
-        .inner-table tr:hover td {
-            background-color: #f1f3f5 !important; /* Subtle hover effect */
-            transition: background-color 0.2s ease-in-out !important;
-        }
+    .inner-table tr:hover td {
+    background-color: #f1f3f5 !important; /* Subtle hover effect */
+    transition: background-color 0.2s ease-in-out !important;
+    }
 
-        .inner-table .fw-bold {
-            background-color: #f6f7fb !important; /* light bluish tint for total row */
-            color: #0d6efd !important; /* Pulse primary blue */
-        }
+    .inner-table .fw-bold {
+    background-color: #f6f7fb !important; /* light bluish tint for total row */
+    color: #0d6efd !important; /* Pulse primary blue */
+    }
 
     /* Add subtle border glow to inner table when expanded */
     tr.shown + tr .inner-table {
-        box-shadow: 0 0 6px rgba(13, 110, 253, 0.2) !important;
+    box-shadow: 0 0 6px rgba(13, 110, 253, 0.2) !important;
     }
 </style>
 
@@ -154,11 +154,24 @@
                         <td>Rs. @item.Total.ToString("N2")</td>
 
                         <td>
-                            <button class="btn btn-sm btn-info view-details">Edit</button>
+                        
 
-                            <button class="btn btn-sm btn-success" onclick="openModal('Received Payment','/PointOfSale/ReceivedPayment?id=@item.MainID','md')">
-                                Received Payment
-                            </button>
+                            @if (item.Status == "Un-Paid")
+                            {
+                                <button class="btn btn-sm btn-info view-details">Edit</button>
+                                <button class="btn btn-sm btn-success" onclick="openModal('Received Payment','/PointOfSale/ReceivedPayment?id=@item.MainID','md')">
+                                    Received Payment
+                                </button>
+                            }
+                            else if (item.Status == "Paid")
+                            {
+                                <button class="btn btn-sm btn-warning"
+                                        onclick="openModal('Receipt Preview', '/PointOfSale/ReceiptPreview?invoiceId=@item.MainID','lg')">
+                                    <i class="bi bi-printer"></i> Preview Receipt
+                                </button>
+
+                            }
+
                         </td>
                     </tr>
                 }
